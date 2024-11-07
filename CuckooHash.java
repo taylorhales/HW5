@@ -1,6 +1,6 @@
 /******************************************************************
  *
- *   YOUR NAME / SECTION NUMBER
+ *   Taylor Hales / COMP 400C-001
  *
  *   Note, additional comments provided throughout this source code
  *   is for educational purposes
@@ -250,7 +250,48 @@ public class CuckooHash<K, V> {
 		// Also make sure you read this method's prologue above, it should help
 		// you. Especially the two HINTS in the prologue.
 
-		return;
+		int pos1 = hash1(key);
+		int pos2 = hash2(key);
+
+		// check if the key-value pair already exists to avoid unnecessary insertions
+		if ((table[pos1] != null && table[pos1].getBucKey().equals(key) && table[pos1].getValue().equals(value)) ||
+				(table[pos2] != null && table[pos2].getBucKey().equals(key) && table[pos2].getValue().equals(value))) {
+			return;
+		}
+
+		Bucket<K, V> newBucket = new Bucket<>(key, value);
+		int count = 0;
+		int pos = pos1;
+
+		// cuckoo hashing loop to handle collisions up to CAPACITY moves
+		while (count < CAPACITY) {
+			if (table[pos] == null) {
+				// place the new element in an empty slot and exit
+				table[pos] = newBucket;
+				return;
+			}
+
+			// kick out the existing element and place the new one
+			Bucket<K, V> kickedOut = table[pos];
+			table[pos] = newBucket;
+
+			// prepare the next bucket for the kicked-out element
+			newBucket = kickedOut;
+			pos = (pos == pos1) ? hash2(newBucket.getBucKey()) : hash1(newBucket.getBucKey());
+			count++;
+		}
+
+		// if a cycle is detected, trigger rehash and place the last kicked-out element manually
+		rehash();
+
+		// directly place the last kicked-out element after rehash, avoiding a recursive call
+		int newPos1 = hash1(newBucket.getBucKey());
+		int newPos2 = hash2(newBucket.getBucKey());
+		if (table[newPos1] == null) {
+			table[newPos1] = newBucket;
+		} else {
+			table[newPos2] = newBucket;
+		}
 	}
 
 

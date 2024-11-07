@@ -1,6 +1,6 @@
 /******************************************************************
  *
- *   YOUR NAME / SECTION NUMBER
+ *   Taylor Hales / COMP 400C-001
  *
  *   Note, additional comments provided throughout source code is
  *   for educational purposes.
@@ -224,7 +224,20 @@ class BloomFilter {
         // this class on available methods. You can also see how method 'add'
         // in this class uses the object.
 
-        return false;
+        // loop through each hash function starting at 0 to noHashes-1
+        for (int n = 0; n < noHashes; n++){
+            // calculate the hash code for this specific hash function
+            long hc = hashCode(s, n);
+
+            // calculate bit position in BitSet by masking hash code
+            int bitNo = (int) (hc) & this.hashMask;
+
+            // check if calculated bit is in BitSet
+            if (!data.get(bitNo)){
+                return false; // if any bits aren't set, the element is not in the set
+            }
+        }
+        return true; // if all required bits are set, return true
     }
 
 
